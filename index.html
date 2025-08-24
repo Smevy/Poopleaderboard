@@ -1,65 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Poop Leaderboard</title>
-<style>
-  body { font-family: sans-serif; background: #f0f0f0; padding: 2rem; }
-  h1 { text-align: center; margin-bottom: 2rem; }
-  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-  .item { background: white; padding: 0.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .item img { max-width: 100%; border-radius: 6px; }
-  .item .info { margin-top: 0.5rem; font-size: 0.85rem; color: #555; word-wrap: break-word; }
-</style>
+    <title>Poop Leaderboard</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        img {
+            max-width: 100px;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
+    <h1 style="text-align:center;">Poop Leaderboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Sender</th>
+                <th>Message ID</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody id="data"></tbody>
+    </table>
 
-<h1>Latest Poops</h1>
-<div id="gallery" class="gallery"></div>
+    <script>
+        const sheetId = "1MpbHvg3T6gLetHKB-x4X4o1JWPZf74Rb3fa62RZ7CZc";
+        const apiKey = "AIzaSyBl3BqjTc4iHMFUOtCl-s-qgeNEgaUTlcA";
+        const range = "Sheet1!A:D";
 
-<script>
-  const SHEET_ID = "1MpbHvg3T6gLetHKB-x4X4o1JWPZf74Rb3fa62RZ7CZc"; // Google Sheet ID
-  const API_KEY = "AIzaSyBl3BqjTc4iHMFUOtCl-s-qgeNEgaUTlcA";  // Sheets API key
-  const RANGE = "History!A:D";            // Timestamp, Sender, MessageID, Image ID
+        fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                const rows = data.values;
+                const table = document.getElementById("data");
 
-  async function loadLeaderboard() {
-    try {
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
-      const res = await fetch(url);
-      const data = await res.json();
+                rows.slice(1).forEach(row => {
+                    const tr = document.createElement("tr");
 
-      if (!data.values || data.values.length < 2) return;
+                    // Timestamp
+                    const tdTimestamp = document.createElement("td");
+                    tdTimestamp.textContent = row[0] || "";
+                    tr.appendChild(tdTimestamp);
 
-      const rows = data.values.slice(1); // skip header
-      // Sort newest first
-      rows.sort((a,b) => new Date(b[0]) - new Date(a[0]));
+                    // Sender (first 16 chars, remove quotes)
+                    const tdSender = document.createElement("td");
+                    let sender = row[1] || "";
+                    sender = sender.substring(0, 16).replace(/"/g, "");
+                    tdSender.textContent = sender;
+                    tr.appendChild(tdSender);
 
-      const gallery = document.getElementById("gallery");
-      rows.forEach(row => {
-        const [timestamp, sender, messageId, imageId] = row;
-        if (!imageId) return;
+                    // Message ID
+                    const tdMessage = document.createElement("td");
+                    tdMessage.textContent = row[2] || "";
+                    tr.appendChild(tdMessage);
 
-        // Use Drive thumbnail URL
-        const imgUrl = `https://drive.google.com/thumbnail?id=${imageId}&sz=w1000`;
+                    // Image
+                    const tdImage = document.createElement("td");
+                    if (row[3]) {
+                        const img = document.createElement("img");
+                        img.src = `https://drive.google.com/thumbnail?id=${row[3]}&sz=w1000`;
+                        tdImage.appendChild(img);
+                    } else {
+                        tdImage.textContent = "No Image";
+                    }
+                    tr.appendChild(tdImage);
 
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <img src="${imgUrl}" alt="Poop Image">
-          <div class="info">
-            <strong>${sender}</strong><br>${new Date(timestamp).toLocaleString()}<br>ID: ${messageId}
-          </div>
-        `;
-        gallery.appendChild(div);
-      });
-    } catch(err) {
-      console.error("Failed to load leaderboard:", err);
-    }
-  }
-
-  window.addEventListener("DOMContentLoaded", loadLeaderboard);
-</script>
-
+                    table.appendChild(tr);
+                });
+            })
+            .catch(error => console.error("Error loading data:", error));
+    </script>
 </body>
 </html>
