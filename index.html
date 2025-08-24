@@ -1,66 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Poop Leaderboard</title>
-  <style>
-    body { font-family: sans-serif; background: #f0f0f0; }
-    h1 { text-align: center; }
-    .gallery { display: flex; flex-wrap: wrap; justify-content: center; }
-    .card {
-      background: white;
-      border: 1px solid #ccc;
-      margin: 10px;
-      padding: 5px;
-      text-align: center;
-      width: 160px;
-      box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
-    }
-    .card img { max-width: 150px; max-height: 150px; display: block; margin: 0 auto 5px; }
-    .card .info { font-size: 12px; color: #555; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poop Leaderboard</title>
+<style>
+  body { font-family: sans-serif; padding: 2rem; background: #f0f0f0; }
+  h1 { text-align: center; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+  .item { background: white; padding: 0.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .item img { max-width: 100%; border-radius: 6px; }
+  .item .info { margin-top: 0.5rem; font-size: 0.85rem; color: #555; }
+</style>
 </head>
 <body>
-  <h1>Latest Poops</h1>
-  <div class="gallery" id="gallery"></div>
 
-  <script>
-    const webAppUrl = 'https://script.google.com/macros/s/AKfycbzxUqRIo9YXgqk856ARXM44WHAd4kKOAi872pME5bbF3XKYXlbuSMCaJRHE8fBWyQCI/exec'; // paste your Apps Script Web App URL
+<h1>Latest Poops</h1>
+<div id="gallery" class="gallery"></div>
 
-    async function loadGallery() {
-      try {
-        const res = await fetch(webAppUrl);
-        const data = await res.json();
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.6.0/tabletop.min.js"></script>
+<script>
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1MpbHvg3T6gLetHKB-x4X4o1JWPZf74Rb3fa62RZ7CZc/edit?usp=sharing";
 
-        // Sort by timestamp descending
-        data.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+function init() {
+  Tabletop.init({
+    key: SHEET_URL,
+    simpleSheet: true,
+    callback: displayImages
+  });
+}
 
-        const gallery = document.getElementById('gallery');
-        gallery.innerHTML = '';
+function displayImages(data) {
+  const gallery = document.getElementById("gallery");
 
-        data.forEach(item => {
-          const card = document.createElement('div');
-          card.className = 'card';
+  // Sort latest first
+  data.sort((a,b) => new Date(b.Timestamp) - new Date(a.Timestamp));
 
-          const img = document.createElement('img');
-          img.src = item.imageUrl;
-          card.appendChild(img);
+  data.forEach(entry => {
+    // Use your thumbnail URL format
+    const imgUrl = `https://drive.google.com/thumbnail?id=${entry.FileID}&sz=w1000`;
 
-          const info = document.createElement('div');
-          info.className = 'info';
-          info.innerText = `${item.sender}\n${new Date(item.timestamp).toLocaleString()}`;
-          card.appendChild(info);
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <img src="${imgUrl}" alt="Poop Image">
+      <div class="info">
+        <strong>${entry.Sender}</strong><br>
+        ${entry.Timestamp}
+      </div>
+    `;
+    gallery.appendChild(div);
+  });
+}
 
-          gallery.appendChild(card);
-        });
-      } catch (err) {
-        console.error('Error loading gallery:', err);
-      }
-    }
-
-    loadGallery();
-    // Refresh every 5 minutes
-    setInterval(loadGallery, 300000);
-  </script>
+window.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
