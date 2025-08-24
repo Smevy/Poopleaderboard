@@ -21,7 +21,7 @@
 <script>
   const SHEET_ID = "1MpbHvg3T6gLetHKB-x4X4o1JWPZf74Rb3fa62RZ7CZc"; // Google Sheet ID
   const API_KEY = "AIzaSyBl3BqjTc4iHMFUOtCl-s-qgeNEgaUTlcA";  // Sheets API key
-  const RANGE = "History!A:D";            // Columns: Timestamp, Sender, MessageID, Image ID
+  const RANGE = "History!A:D";            // Timestamp, Sender, MessageID, Image ID
 
   async function loadLeaderboard() {
     try {
@@ -32,14 +32,15 @@
       if (!data.values || data.values.length < 2) return;
 
       const rows = data.values.slice(1); // skip header
-      // Sort latest first
+      // Sort newest first
       rows.sort((a,b) => new Date(b[0]) - new Date(a[0]));
 
       const gallery = document.getElementById("gallery");
       rows.forEach(row => {
         const [timestamp, sender, messageId, imageId] = row;
-        if (!imageId) return; // skip empty
+        if (!imageId) return;
 
+        // Use Drive thumbnail URL
         const imgUrl = `https://drive.google.com/thumbnail?id=${imageId}&sz=w1000`;
 
         const div = document.createElement("div");
