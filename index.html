@@ -1,16 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Latest Poops</title>
+  <meta charset="utf-8">
+  <title>Poop Leaderboard</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    body { font-family: sans-serif; background: #f0f0f0; }
     h1 { text-align: center; }
-    .gallery { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-    .poop-card { background: white; padding: 10px; border-radius: 8px; width: 200px; text-align: center; }
-    .poop-card img { max-width: 100%; border-radius: 5px; }
-    .timestamp { font-size: 12px; color: #555; margin-top: 5px; }
-    .sender { font-size: 14px; font-weight: bold; }
+    .gallery { display: flex; flex-wrap: wrap; justify-content: center; }
+    .card {
+      background: white;
+      border: 1px solid #ccc;
+      margin: 10px;
+      padding: 5px;
+      text-align: center;
+      width: 160px;
+      box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+    }
+    .card img { max-width: 150px; max-height: 150px; display: block; margin: 0 auto 5px; }
+    .card .info { font-size: 12px; color: #555; }
   </style>
 </head>
 <body>
@@ -18,56 +25,42 @@
   <div class="gallery" id="gallery"></div>
 
   <script>
-    // Replace with your Google Sheet ID
-    const SHEET_ID = "1MpbHvg3T6gLetHKB-x4X4o1JWPZf74Rb3fa62RZ7CZc";
-    const SHEET_NAME = "DownloadHistory"; // must match your sheet
+    const webAppUrl = 'YOUR_WEB_APP_URL_HERE'; // paste your Apps Script Web App URL
 
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+    async function loadGallery() {
+      try {
+        const res = await fetch(webAppUrl);
+        const data = await res.json();
 
-    fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        // Remove extra Google callback
-        const jsonData = JSON.parse(data.substring(data.indexOf('{'), data.lastIndexOf('}') + 1));
-        const rows = jsonData.table.rows;
+        // Sort by timestamp descending
+        data.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        // Sort by timestamp descending (latest first)
-        rows.sort((a, b) => new Date(b.c[0].v) - new Date(a.c[0].v));
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = '';
 
-        const gallery = document.getElementById("gallery");
-        rows.forEach(row => {
-          const timestamp = row.c[0] ? row.c[0].v : "";
-          const sender = row.c[1] ? row.c[1].v : "";
-          const messageId = row.c[2] ? row.c[2].v : "";
-          const fileId = row.c[3] ? row.c[3].v : "";
-const fileUrl = fileId ? `https://drive.google.com/uc?export=view&id=${fileId}` : "";
+        data.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
 
+          const img = document.createElement('img');
+          img.src = item.imageUrl;
+          card.appendChild(img);
 
-          if (fileUrl) {
-            const card = document.createElement("div");
-            card.className = "poop-card";
+          const info = document.createElement('div');
+          info.className = 'info';
+          info.innerText = `${item.sender}\n${new Date(item.timestamp).toLocaleString()}`;
+          card.appendChild(info);
 
-            const img = document.createElement("img");
-            img.src = fileUrl;
-            img.alt = `Poop from ${sender}`;
-
-            const senderDiv = document.createElement("div");
-            senderDiv.className = "sender";
-            senderDiv.textContent = sender;
-
-            const timeDiv = document.createElement("div");
-            timeDiv.className = "timestamp";
-            timeDiv.textContent = new Date(timestamp).toLocaleString();
-
-            card.appendChild(img);
-            card.appendChild(senderDiv);
-            card.appendChild(timeDiv);
-
-            gallery.appendChild(card);
-          }
+          gallery.appendChild(card);
         });
-      })
-      .catch(err => console.error("Error loading sheet data:", err));
+      } catch (err) {
+        console.error('Error loading gallery:', err);
+      }
+    }
+
+    loadGallery();
+    // Refresh every 5 minutes
+    setInterval(loadGallery, 300000);
   </script>
 </body>
 </html>
