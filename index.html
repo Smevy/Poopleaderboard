@@ -1,65 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Poop Leaderboard</title>
-<style>
-  body { font-family: sans-serif; background: #f0f0f0; padding: 2rem; }
-  h1 { text-align: center; margin-bottom: 2rem; }
-  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-  .item { background: white; padding: 0.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .item img { max-width: 100%; border-radius: 6px; }
-  .item .info { margin-top: 0.5rem; font-size: 0.85rem; color: #555; word-wrap: break-word; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poop Leaderboard</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <h1>Latest Poops</h1>
 <div id="gallery" class="gallery"></div>
 
-<script>
-  const SHEET_ID = "1MpbHvg3T6gLetHKB-x4X4o1JWPZf74Rb3fa62RZ7CZc"; // Google Sheet ID
-  const API_KEY = "AIzaSyBl3BqjTc4iHMFUOtCl-s-qgeNEgaUTlcA";  // Sheets API key
-  const RANGE = "History!A:D";            // Timestamp, Sender, MessageID, Image ID
-
-  async function loadLeaderboard() {
-    try {
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (!data.values || data.values.length < 2) return;
-
-      const rows = data.values.slice(1); // skip header
-      // Sort newest first
-      rows.sort((a,b) => new Date(b[0]) - new Date(a[0]));
-
-      const gallery = document.getElementById("gallery");
-      rows.forEach(row => {
-        const [timestamp, sender, messageId, imageId] = row;
-        if (!imageId) return;
-
-        // Use Drive thumbnail URL
-        const imgUrl = `https://drive.google.com/thumbnail?id=${imageId}&sz=w1000`;
-
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <img src="${imgUrl}" alt="Poop Image">
-          <div class="info">
-            <strong>${sender}</strong><br>${new Date(timestamp).toLocaleString()}<br>ID: ${messageId}
-          </div>
-        `;
-        gallery.appendChild(div);
-      });
-    } catch(err) {
-      console.error("Failed to load leaderboard:", err);
-    }
-  }
-
-  window.addEventListener("DOMContentLoaded", loadLeaderboard);
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
