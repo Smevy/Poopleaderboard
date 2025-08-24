@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Latest Poops</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    h1 { text-align: center; }
+    .gallery { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .poop-card { background: white; padding: 10px; border-radius: 8px; width: 200px; text-align: center; }
+    .poop-card img { max-width: 100%; border-radius: 5px; }
+    .timestamp { font-size: 12px; color: #555; margin-top: 5px; }
+    .sender { font-size: 14px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Latest Poops</h1>
+  <div class="gallery" id="gallery"></div>
+
+  <script>
+    // Replace with your Google Sheet ID
+    const SHEET_ID = "1MpbHvg3T6gLetHKB-x4X4o1JWPZf74Rb3fa62RZ7CZc";
+    const SHEET_NAME = "DownloadHistory"; // must match your sheet
+
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+
+    fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        // Remove extra Google callback
+        const jsonData = JSON.parse(data.substring(data.indexOf('{'), data.lastIndexOf('}') + 1));
+        const rows = jsonData.table.rows;
+
+        // Sort by timestamp descending (latest first)
+        rows.sort((a, b) => new Date(b.c[0].v) - new Date(a.c[0].v));
+
+        const gallery = document.getElementById("gallery");
+        rows.forEach(row => {
+          const timestamp = row.c[0] ? row.c[0].v : "";
+          const sender = row.c[1] ? row.c[1].v : "";
+          const messageId = row.c[2] ? row.c[2].v : "";
+          const fileUrl = row.c[3] ? row.c[3].v : "";
+
+          if (fileUrl) {
+            const card = document.createElement("div");
+            card.className = "poop-card";
+
+            const img = document.createElement("img");
+            img.src = fileUrl;
+            img.alt = `Poop from ${sender}`;
+
+            const senderDiv = document.createElement("div");
+            senderDiv.className = "sender";
+            senderDiv.textContent = sender;
+
+            const timeDiv = document.createElement("div");
+            timeDiv.className = "timestamp";
+            timeDiv.textContent = new Date(timestamp).toLocaleString();
+
+            card.appendChild(img);
+            card.appendChild(senderDiv);
+            card.appendChild(timeDiv);
+
+            gallery.appendChild(card);
+          }
+        });
+      })
+      .catch(err => console.error("Error loading sheet data:", err));
+  </script>
+</body>
+</html>
