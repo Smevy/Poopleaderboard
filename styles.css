@@ -1,68 +1,76 @@
-/* General Styling */
+/* Coffee-inspired color palette */
+:root {
+  --coffee-light: #d9c7b6;
+  --coffee-medium: #a3836b;
+  --coffee-dark: #5b3a29;
+  --coffee-text: #3e2c23;
+  --card-bg: #f8f3ef;
+}
+
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #3e2723; /* Dark coffee brown */
-  color: #f3e5ab; /* Light creamy text */
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: var(--coffee-light);
+  color: var(--coffee-text);
   margin: 0;
   padding: 0;
 }
 
-/* Header */
 header {
-  background: #4e342e; /* Medium coffee tone */
   text-align: center;
+  background: var(--coffee-dark);
+  color: white;
   padding: 1.5rem;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  border-bottom: 4px solid var(--coffee-medium);
 }
 
 header h1 {
   margin: 0;
   font-size: 2rem;
-  color: #f5f5f5;
 }
 
-/* Main gallery layout */
+header p {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #f0e5dc;
+}
+
 main {
   padding: 2rem;
 }
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1.5rem;
 }
 
-/* Individual item styling */
 .item {
-  background: #5d4037; /* Coffee brown card */
+  background: var(--card-bg);
+  border-radius: 12px;
   padding: 0.8rem;
-  border-radius: 10px;
   text-align: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
 }
 
 .item img {
   max-width: 100%;
-  border-radius: 8px;
-  border: 2px solid #d7ccc8; /* Cream border */
+  border-radius: 10px;
+  margin-bottom: 0.8rem;
 }
 
-.info {
-  margin-top: 0.6rem;
+.item .info {
   font-size: 0.9rem;
-  color: #efebe9; /* Slightly lighter text */
-  word-wrap: break-word;
+  color: var(--coffee-text);
 }
 
-.info strong {
+.item .info strong {
   display: block;
   font-size: 1rem;
-  margin-bottom: 0.2rem;
-  color: #ffe0b2; /* Warm highlight for names */
+  color: var(--coffee-dark);
 }

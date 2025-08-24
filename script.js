@@ -11,33 +11,32 @@ async function loadLeaderboard() {
     if (!data.values || data.values.length < 2) return;
 
     const rows = data.values.slice(1); // skip header
-    rows.sort((a,b) => new Date(b[0]) - new Date(a[0])); // newest first
+    rows.sort((a, b) => new Date(b[0]) - new Date(a[0])); // newest first
 
     const gallery = document.getElementById("gallery");
+
     rows.forEach(row => {
       const [timestamp, sender, messageId, imageId] = row;
       if (!imageId) return;
 
-      // Apply name rule: first 16 chars, remove quotes
-      let displayName = sender ? sender.slice(0, 16).replace(/"/g, '') : 'Unknown';
-
-      // Google Drive thumbnail URL
       const imgUrl = `https://drive.google.com/thumbnail?id=${imageId}&sz=w1000`;
 
-      // Create gallery card
+      // Apply naming rules: first 16 chars, remove quotes
+      let displayName = sender.slice(0, 16).replace(/"/g, '');
+
       const div = document.createElement("div");
       div.className = "item";
       div.innerHTML = `
         <img src="${imgUrl}" alt="Poop Image">
         <div class="info">
           <strong>${displayName}</strong>
-          ${new Date(timestamp).toLocaleString()}<br>
-          ID: ${messageId}
+          <span>${new Date(timestamp).toLocaleString()}</span><br>
+          <small>ID: ${messageId}</small>
         </div>
       `;
       gallery.appendChild(div);
     });
-  } catch(err) {
+  } catch (err) {
     console.error("Failed to load leaderboard:", err);
   }
 }
